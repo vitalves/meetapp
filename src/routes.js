@@ -8,7 +8,7 @@ import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import FileController from './app/controllers/FileController';
 
-// middleware
+// middlewares
 import authMiddleware from './app/middlewares/auth';
 
 // CONSTANTES:
