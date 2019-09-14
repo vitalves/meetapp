@@ -57,6 +57,56 @@ class MeetupControler {
 
     return res.json(meetup);
   }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      file_id: Yup.number(),
+      title: Yup.string(),
+      description: Yup.string(),
+      location: Yup.string(),
+      date: Yup.date(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Falha na validacao dos dados' });
+    }
+
+    const user_id = req.userId;
+
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    if (meetup.user_id !== user_id) {
+      return res.status(400).json({ error: 'Nao aitorizado' });
+    }
+
+    if (isBefore(parseISO(req.body.date), new Date())) {
+      return res.status(400).json({ error: 'Data invalida' });
+    }
+
+    if (meetup.paste) {
+      return res
+        .status(400)
+        .json({ error: 'Meetup passado nao pode ser editado' });
+    }
+
+    await meetup.update(req.body);
+
+    return res.json(meetup);
+  }
+
+  async delete(req, res) {
+    const user_id = req.userId;
+
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    if (meetup.user_id !== user_id) {
+      return res.status(401).json({ error: 'Nao autorizado' });
+    }
+
+    await meetup.destroy();
+
+    return res.send();
+  }
 }
 
 export default new MeetupControler();
