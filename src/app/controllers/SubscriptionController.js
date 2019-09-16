@@ -3,6 +3,9 @@ import Subscription from '../models/Subscription';
 import User from '../models/User';
 import Meetup from '../models/Meetup';
 
+import NotificationMail from '../jobs/NotificationMail';
+import Queue from '../../lib/Queue';
+
 class SubscriptionController {
   async index(req, res) {
     const subscriptions = await Subscription.findAll({
@@ -95,6 +98,13 @@ class SubscriptionController {
     const subscription = await Subscription.create({
       user_id: user.id,
       meetup_id: meetup.id,
+    });
+
+    // envia um email de aviso (ENVIA PARA A FILA - Queue -):
+    await Queue.add(NotificationMail.key, {
+      // dados do email:
+      meetup,
+      user,
     });
 
     return res.json(subscription);
